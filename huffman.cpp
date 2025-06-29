@@ -1,3 +1,4 @@
+#include<bits/stdc++.h>
 #include "huffman.hpp"
 
 void huffman::createArr() {
@@ -243,4 +244,47 @@ void huffman::compress() {
 void huffman::decompress() {
     getTree();
     saveDecodedFile();
+}
+
+
+void huffman::outputTreeAsDot(const std::string& filename) {
+    std::ofstream out(filename);
+    if (!out) return;
+    out << "digraph HuffmanTree {\n";
+    std::map<Node*, int> node_ids;
+    int id_counter = 0;
+
+    // Helper lambda to recursively print the tree
+    std::function<void(Node*)> dfs = [&](Node* node) {
+        if (!node) return;
+        int my_id = id_counter++;
+        node_ids[node] = my_id;
+        std::string label;
+        if (!node->left && !node->right) {
+            // Leaf node: print char and freq
+            if (node->data == '\n') label = "\\n";
+            else if (node->data == ' ') label = "space";
+            else label = std::string(1, node->data);
+            label += " (" + std::to_string(node->freq) + ")";
+        } else {
+            label = std::to_string(node->freq);
+        }
+        out << "  node" << my_id << " [label=\"" << label << "\"];\n";
+        // Left child
+        if (node->left) {
+            dfs(node->left);
+            out << "  node" << my_id << " -> node" << node_ids[node->left] << " [label=\"0\"];\n";
+        }
+        // Right child
+        if (node->right) {
+            dfs(node->right);
+            out << "  node" << my_id << " -> node" << node_ids[node->right] << " [label=\"1\"];\n";
+        }
+    };
+
+    // Start at the root
+    dfs(root); // replace 'root' with your actual root pointer
+
+    out << "}\n";
+    out.close();
 }

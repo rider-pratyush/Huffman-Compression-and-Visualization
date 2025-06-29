@@ -1,4 +1,4 @@
- //Header Guards to prevent header files from being included multiple times
+//Header Guards to prevent header files from being included multiple times
 #ifndef HUFFMAN_HPP
 #define HUFFMAN_HPP
 #include <string>
@@ -71,6 +71,9 @@ class huffman {
         
         //Reading the file to reconstruct the Huffman tree
         void getTree();
+        //Get the tree
+    public:
+        void outputTreeAsDot(const std::string& filename);
 
     public:
         //Constructor
