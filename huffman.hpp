@@ -1,91 +1,63 @@
-//Header Guards to prevent header files from being included multiple times
 #ifndef HUFFMAN_HPP
 #define HUFFMAN_HPP
+
+#include <array>
+#include <cstdint>
+#include <iosfwd>
+#include <memory>
 #include <string>
 #include <vector>
-#include <queue>
-#include <fstream>
-using namespace std;
 
-//Defining Huffman Tree Node
-struct Node {
-    char data;
-    unsigned freq;
-    string code;
-    Node *left, *right;
-
-    Node() {
-        left = right = NULL;
-    }
-};
-
+// Creates and reads HUF1 archives. Files are treated as raw bytes, so text,
+// PDFs, images, videos, presentations, and other binary formats are preserved.
 class huffman {
-    private:
-        vector <Node*> arr;
+private:
+    struct Node {
+        std::uint8_t symbol{};
+        std::uint64_t frequency{};
+        std::uint16_t smallestSymbol{};
+        Node* left{nullptr};
+        Node* right{nullptr};
 
-        fstream inFile, outFile;
+        bool isLeaf() const { return left == nullptr && right == nullptr; }
+    };
 
-        string inFileName, outFileName;
-        
-        Node *root;
-        
-        class Compare {
-            public:
-                bool operator() (Node* l, Node* r)
-                {
-                    return l->freq > r->freq;
-                }
-        };
+    struct Header {
+        std::uint8_t method{};
+        std::uint64_t originalSize{};
+        std::string originalFilename;
+    };
 
-        priority_queue <Node*, vector<Node*>, Compare> minHeap;
-        
-        //Initializing a vector of tree nodes representing character's ascii value and initializing its frequency with 0
-        void createArr();
-        
-        //Traversing the constructed tree to generate huffman codes of each present character
-        void traverse(Node*, string);
-        
-        //Function to convert binary string to its equivalent decimal value
-        int binToDec(string);
-        
-        //Function to convert a decimal number to its equivalent binary string
-        string decToBin(int);
-        
-        //Reconstructing the Huffman tree while Decoding the file
-        void buildTree(char, string&);
+    std::string inFileName;
+    std::string outFileName;
+    std::string restoredFileName;
+    std::array<std::uint64_t, 256> frequencies{};
+    std::array<std::string, 256> codes{};
+    std::vector<std::unique_ptr<Node>> nodes;
+    Node* root{nullptr};
 
-        //Creating Min Heap of Nodes by frequency of characters in the input file
-        void createMinHeap();
-        
-        //Constructing the Huffman tree
-        void createTree();
-        
-        //Generating Huffman codes
-        void createCodes();
-        
-        //Saving Huffman Encoded File
-        void saveEncodedFile();
-        
-        //Saving Decoded File to obtain the original File
-        void saveDecodedFile();
-        
-        //Reading the file to reconstruct the Huffman tree
-        void getTree();
-        //Get the tree
-    public:
-        void outputTreeAsDot(const std::string& filename);
+    void collectStatistics();
+    void buildTree();
+    void createCodes(Node* node, const std::string& code);
+    std::uint64_t encodedBitCount() const;
+    std::string archiveFilename() const;
+    std::size_t usedSymbolCount() const;
 
-    public:
-        //Constructor
-        huffman(string inFileName, string outFileName)
-        {
-            this->inFileName = inFileName;
-            this->outFileName = outFileName;
-            createArr();
-        }
-        //Compressing input file
-        void compress();
-        //Decrompressing input file
-        void decompress();
+    Header readHeader(std::istream& input);
+    void writeHeader(std::ostream& output, std::uint8_t method,
+                     std::uint64_t originalSize, const std::string& filename) const;
+    void writeFrequencyTable(std::ostream& output) const;
+    void readFrequencyTable(std::istream& input);
+
+public:
+    huffman(const std::string& inputFileName, const std::string& outputFileName = "")
+        : inFileName(inputFileName), outFileName(outputFileName) {}
+
+    void compress();
+    void decompress();
+
+    // Available after decompression. It is the complete path actually written.
+    const std::string& getRestoredFileName() const { return restoredFileName; }
 };
+
 #endif

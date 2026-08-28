@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Huffman File Archiver — Changes</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #172033; background: #f4f7fb; }
+    body { margin: 0; padding: 2rem 1rem; }
+    main { max-width: 850px; margin: auto; background: white; padding: clamp(1.5rem, 5vw, 3.5rem); border-radius: 16px; box-shadow: 0 10px 30px #17203318; }
+    h1 { margin-top: 0; color: #163f7a; } h2 { margin-top: 2rem; color: #205da6; }
+    .tag { display: inline-block; padding: .3rem .65rem; border-radius: 99px; color: #0c5a38; background: #ddf7e8; font-weight: 700; }
+    code { padding: .15rem .35rem; border-radius: 4px; background: #eef2f8; } li { margin: .6rem 0; line-height: 1.5; }
+    table { width: 100%; border-collapse: collapse; } th, td { padding: .7rem; text-align: left; border-bottom: 1px solid #dbe3ef; }
+    th { color: #163f7a; } .note { padding: 1rem; background: #fff5d9; border-left: 4px solid #e5a900; border-radius: 4px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="tag">Implemented</span>
+    <h1>Binary-safe Huffman File Archiver</h1>
+    <p>This update changes the project from a text-only compressor into a lossless archiver for any file type.</p>
+
+    <h2>What changed</h2>
+    <ul>
+      <li>All input and output now use binary mode, preventing corruption of PDFs, images, videos, presentations, and arbitrary data.</li>
+      <li>The compressor now handles all <strong>256 byte values</strong>, instead of only 128 ASCII characters.</li>
+      <li>A new versioned <code>HUF1</code> archive format stores the original filename, extension, original size, compression method, and Huffman frequency table.</li>
+      <li>Decompression restores the exact original bytes and preserves the original file extension.</li>
+      <li>The Huffman tree has deterministic tie-breaking, so an archive can always rebuild the same tree while restoring.</li>
+      <li>Archives now use a <em>stored</em> mode when Huffman metadata would make the file larger.</li>
+      <li>The command-line decoder accepts an optional output path and otherwise uses the archived filename without overwriting an existing file.</li>
+      <li>The desktop interface now suggests the archived filename automatically when restoring a file.</li>
+      <li>Error messages report damaged archives, invalid headers, incomplete data, and file-access problems clearly.</li>
+      <li>Older archives created by the original text-only format are not compatible with the new <code>HUF1</code> format; keep the earlier executable if you need to restore them.</li>
+    </ul>
+
+    <h2>Archive layout</h2>
+    <table>
+      <tr><th>Part</th><th>Purpose</th></tr>
+      <tr><td><code>HUF1</code> + version</td><td>Identifies this archive format safely.</td></tr>
+      <tr><td>Original filename</td><td>Restores extensions such as <code>.pdf</code>, <code>.png</code>, <code>.mp4</code>, and <code>.pptx</code>.</td></tr>
+      <tr><td>Original size</td><td>Lets the decoder know exactly when restoration is complete.</td></tr>
+      <tr><td>Method</td><td>Chooses Huffman coding only when it wins; otherwise raw bytes are stored safely.</td></tr>
+      <tr><td>Frequency table / payload</td><td>Contains enough information to recreate compressed data exactly.</td></tr>
+    </table>
+
+    <h2>How to use it</h2>
+    <ul>
+      <li>Build: <code>g++ -std=c++17 -O2 encode.cpp huffman.cpp -o encode.exe</code> and <code>g++ -std=c++17 -O2 decode.cpp huffman.cpp -o decode.exe</code></li>
+      <li>Archive: <code>encode.exe input.pdf output.huf</code></li>
+      <li>Restore: <code>decode.exe output.huf restored.pdf</code></li>
+      <li>Or run <code>huffman_gui.py</code> and use the two buttons.</li>
+    </ul>
+
+    <p class="note"><strong>Important:</strong> JPEG/PNG images, MP4 videos, PDFs, and Office files are often already compressed. This update can archive them safely, but it may not make them smaller. Meaningful size reduction for those formats needs optional, format-specific tools and may be lossy.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huffman File Archiver – Interview Study Guide</title>
+  <meta name="description" content="In-depth interview study guide for the Huffman File Archiver project: algorithm, architecture, BitI/O, Q&A, and metrics.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+    :root {
+      --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--border:#2a3347;
+      --accent:#4f8ef7;--accent2:#7c3aed;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--code-bg:#0d1117;
+      --radius:10px;--shadow:0 4px 24px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"] {
+      --bg:#f8fafc;--bg2:#ffffff;--bg3:#f1f5f9;--border:#cbd5e1;
+      --accent:#2563eb;--accent2:#7c3aed;--green:#16a34a;--amber:#d97706;--red:#dc2626;
+      --text:#0f172a;--text2:#475569;--text3:#94a3b8;--code-bg:#1e293b;
+      --shadow:0 4px 24px rgba(0,0,0,0.1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;}
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    .layout{display:flex;min-height:100vh;}
+    nav#toc{width:280px;min-width:280px;background:var(--bg2);border-right:1px solid var(--border);padding:24px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+    nav#toc .toc-logo{font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+    nav#toc a{display:block;color:var(--text2);font-size:13px;padding:6px 10px;border-radius:6px;transition:all 0.2s;line-height:1.4;}
+    nav#toc a:hover,nav#toc a.active{background:var(--bg3);color:var(--text);text-decoration:none;}
+    nav#toc .toc-section{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin:14px 10px 4px;}
+    main{flex:1;max-width:900px;padding:48px 48px 80px;min-width:0;}
+    .page-header{margin-bottom:56px;}
+    .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+    .badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;border:1px solid;}
+    .badge-blue{color:var(--accent);border-color:var(--accent);background:rgba(79,142,247,0.1);}
+    .badge-green{color:var(--green);border-color:var(--green);background:rgba(34,197,94,0.1);}
+    .badge-amber{color:var(--amber);border-color:var(--amber);background:rgba(245,158,11,0.1);}
+    .badge-purple{color:#a78bfa;border-color:#a78bfa;background:rgba(167,139,250,0.1);}
+    h1.hero{font-size:36px;font-weight:700;line-height:1.2;margin-bottom:16px;background:linear-gradient(135deg,var(--accent) 0%,#a78bfa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .hero-sub{font-size:17px;color:var(--text2);max-width:640px;line-height:1.6;}
+    section{margin-bottom:64px;}
+    h2{font-size:24px;font-weight:700;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px;}
+    h2 .icon{font-size:20px;}
+    h3{font-size:17px;font-weight:600;margin:28px 0 12px;color:var(--accent);}
+    h4{font-size:14px;font-weight:600;margin:18px 0 8px;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;}
+    p{margin-bottom:14px;color:var(--text2);}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:16px;}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px;}
+    .metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden;}
+    .metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+    .metric-num{font-size:32px;font-weight:700;color:var(--accent);line-height:1;margin-bottom:4px;}
+    .metric-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+    pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px;overflow-x:auto;margin:16px 0;position:relative;}
+    pre code{font-family:'JetBrains Mono','Fira Code',monospace;font-size:13px;line-height:1.7;color:#e2e8f0;}
+    .lang-label{position:absolute;top:10px;right:14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+    .kw{color:#c792ea;}.tp{color:#82aaff;}.fn{color:#82CFFA;}.st{color:#c3e88d;}.cm{color:#546e7a;font-style:italic;}.nm{color:#f78c6c;}.op{color:#89ddff;}
+    .table-wrap{overflow-x:auto;margin:16px 0;}
+    table{width:100%;border-collapse:collapse;font-size:14px;}
+    th{background:var(--bg3);color:var(--text);font-weight:600;text-align:left;padding:10px 16px;border:1px solid var(--border);}
+    td{padding:10px 16px;border:1px solid var(--border);color:var(--text2);vertical-align:top;}
+    tr:nth-child(even) td{background:var(--bg2);}
+    code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:#82aaff;}
+    details{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;}
+    summary{cursor:pointer;padding:14px 20px;font-weight:600;font-size:15px;display:flex;align-items:center;gap:10px;list-style:none;user-select:none;transition:background 0.15s;}
+    summary::-webkit-details-marker{display:none;}
+    summary::before{content:'▶';font-size:10px;color:var(--accent);transition:transform 0.2s;}
+    details[open] summary::before{transform:rotate(90deg);}
+    summary:hover{background:var(--bg3);border-radius:var(--radius);}
+    details > *:not(summary){padding:0 20px 20px;}
+    .mermaid-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;overflow-x:auto;margin:16px 0;text-align:center;}
+    .mermaid-wrap pre{background:transparent;border:none;padding:0;margin:0;}
+    .qa-item{border-left:3px solid var(--accent);padding:16px 20px;margin-bottom:16px;background:var(--bg2);border-radius:0 var(--radius) var(--radius) 0;}
+    .qa-q{font-weight:600;color:var(--text);margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;}
+    .qa-q::before{content:'Q';background:var(--accent);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+    .qa-a{color:var(--text2);padding-left:30px;}
+    .qa-a ul{margin-left:18px;margin-top:6px;}
+    .qa-a li{margin-bottom:4px;}
+    .callout{display:flex;gap:14px;padding:14px 18px;border-radius:var(--radius);margin:16px 0;border:1px solid;}
+    .callout-tip{border-color:var(--green);background:rgba(34,197,94,0.07);}
+    .callout-warn{border-color:var(--amber);background:rgba(245,158,11,0.07);}
+    .callout-info{border-color:var(--accent);background:rgba(79,142,247,0.07);}
+    .callout-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .callout-body{font-size:14px;color:var(--text2);}
+    .callout-body strong{color:var(--text);}
+    .timeline{position:relative;padding-left:24px;}
+    .timeline::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);}
+    .timeline-item{position:relative;margin-bottom:20px;}
+    .timeline-item::before{content:'';position:absolute;left:-20px;top:8px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);}
+    .timeline-title{font-weight:600;color:var(--text);margin-bottom:4px;}
+    .timeline-body{font-size:14px;color:var(--text2);}
+    #theme-toggle{position:fixed;top:16px;right:20px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:20px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;display:flex;align-items:center;gap:6px;transition:all 0.2s;z-index:1000;}
+    #theme-toggle:hover{background:var(--bg3);}
+    .file-pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);margin-bottom:12px;}
+    ul,ol{padding-left:22px;color:var(--text2);}
+    li{margin-bottom:6px;}
+    li code{color:#82aaff;}
+    .diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+    .diff-old{border-color:var(--red) !important;}
+    .diff-new{border-color:var(--green) !important;}
+    .diff-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+    .diff-old .diff-label{color:var(--red);}
+    .diff-new .diff-label{color:var(--green);}
+    footer{border-top:1px solid var(--border);padding:24px 48px;font-size:13px;color:var(--text3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    @media(max-width:900px){nav#toc{display:none;}main{padding:32px 20px 60px;}.diff-grid{grid-template-columns:1fr;}h1.hero{font-size:26px;}}
+  </style>
+</head>
+<body>
+
+<button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+  <span id="theme-icon">&#9728;&#65039;</span> Light Mode
+</button>
+
+<div class="layout">
+
+  <nav id="toc" aria-label="Table of contents">
+    <div class="toc-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Study Guide
+    </div>
+    <div class="toc-section">Overview</div>
+    <a href="#summary">Executive Summary</a>
+    <a href="#architecture">Architecture</a>
+    <div class="toc-section">Code Deep Dive</div>
+    <a href="#files">File Walk-through</a>
+    <a href="#bitio">Custom Bit I/O Layer</a>
+    <a href="#algorithm">Algorithm Details</a>
+    <div class="toc-section">Reference</div>
+    <a href="#format">File Format Spec</a>
+    <a href="#metrics">Performance Metrics</a>
+    <a href="#testing">Testing &amp; Validation</a>
+    <div class="toc-section">Interview Prep</div>
+    <a href="#future">Future Work</a>
+    <a href="#qa">Q&amp;A &mdash; 10 Questions</a>
+  </nav>
+
+  <main>
+
+    <header class="page-header">
+      <div class="badge-row">
+        <span class="badge badge-blue">C++17</span>
+        <span class="badge badge-green">Python 3</span>
+        <span class="badge badge-amber">Huffman Coding</span>
+        <span class="badge badge-purple">Interview Ready</span>
+      </div>
+      <h1 class="hero">Huffman File Archiver<br>Interview Study Guide</h1>
+      <p class="hero-sub">A deep-dive technical reference for defending every design decision in the Huffman-Coding-of-Files project &mdash; from the algorithm itself to the custom bit-packing I/O layer and the archive file format.</p>
+    </header>
+
+    <!-- 1. EXECUTIVE SUMMARY -->
+    <section id="summary">
+      <h2><span class="icon">&#127919;</span> Executive Summary</h2>
+      <div class="card">
+        <h4>One-sentence description</h4>
+        <p style="font-size:16px;color:var(--text);margin-bottom:0;">A lossless file archiver that applies <strong>Huffman Coding</strong> on raw bytes to compress any file type, paired with a Python GUI and a custom <code>.huf</code> binary format that safely stores the original filename and restores it exactly.</p>
+      </div>
+      <div class="card-grid">
+        <div class="metric-card"><div class="metric-num">53%</div><div class="metric-label">Compression ratio on text</div></div>
+        <div class="metric-card"><div class="metric-num">8 KB</div><div class="metric-label">I/O buffer (BitWriter)</div></div>
+        <div class="metric-card"><div class="metric-num">99.9%</div><div class="metric-label">Fewer disk system calls</div></div>
+        <div class="metric-card"><div class="metric-num">256</div><div class="metric-label">Symbol alphabet (all bytes)</div></div>
+      </div>
+      <h3>Key achievements</h3>
+      <ul>
+        <li><strong>53% compression</strong> on plain-text datasets using a canonical Huffman tree.</li>
+        <li><strong>Any file type</strong> &mdash; operates on raw bytes (<code>std::ios::binary</code>), so <code>.pdf</code>, <code>.mp4</code>, <code>.pptx</code>, images all work losslessly.</li>
+        <li><strong>Intelligent stored-mode fallback</strong> &mdash; when Huffman overhead would make the file <em>larger</em>, bytes are stored verbatim.</li>
+        <li><strong>8 KB buffered BitWriter/BitReader</strong> &mdash; batches I/O to eliminate millions of per-byte system calls.</li>
+        <li><strong>Deterministic tree reconstruction</strong> &mdash; tie-breaking on smallest byte symbol ensures the same tree is built during decompression.</li>
+        <li><strong>Python tkinter GUI</strong> &mdash; zero-friction archiving via file dialogs; automatically suggests the correct output filename.</li>
+        <li><strong>Custom HUF1 format</strong> &mdash; self-describing archive with magic bytes, version, method flag, original size, and stored filename.</li>
+      </ul>
+    </section>
+
+    <!-- 2. ARCHITECTURE -->
+    <section id="architecture">
+      <h2><span class="icon">&#127959;</span> Architecture Overview</h2>
+      <div class="mermaid-wrap">
+        <pre><code>
+  +--------------------------------------------------+
+  |         huffman_gui.py  (Python / tkinter)       |
+  |  +-------------------+  +---------------------+  |
+  |  | Archive File btn  |  | Restore Archive btn |  |
+  +--+--------+----------+--+---------+-----------+--+
+              |  subprocess.run()     |
+              v                       v
+     +----------------+     +----------------+
+     |  encode.exe    |     |  decode.exe    |
+     |  (C++17)       |     |  (C++17)       |
+     +-------+--------+     +-------+--------+
+             |                      |
+             v                      v
+     +------------------------------------------+
+     |            huffman class                 |
+     | collectStatistics()   buildTree()        |
+     | createCodes()         compress()         |
+     | decompress()          readHeader()       |
+     +-------------+----------------------------+
+                   |
+          +--------+--------+
+          v                 v
+    +-----------+     +-----------+
+    | BitWriter |     | BitReader |
+    |  8KB buf  |     |  8KB buf  |
+    +-----+-----+     +-----+-----+
+          |                 |
+          v                 v
+    +----------------------------------+
+    |       .huf archive file          |
+    |  [HUF1][ver][method][reserved]   |
+    |  [original_size][fn_len][fname]  |
+    |  [freq_table][huffman bitstream] |
+    +----------------------------------+
+        </code></pre>
+      </div>
+      <p><strong>Data flow (encode):</strong> The GUI opens a file dialog and passes the chosen paths to <code>encode.exe</code> via <code>subprocess.run()</code>. The C++ main reads the file, instantiates the <code>huffman</code> class, calls <code>compress()</code>, which scans the file for byte frequencies, builds a priority-queue Huffman tree, assigns variable-length binary codes, then serialises the HUF1 header + frequency table + bit-stream through <code>BitWriter</code>&apos;s 8 KB buffer to the output <code>.huf</code> archive.</p>
+      <p><strong>Data flow (decode):</strong> <code>decode.exe</code> reads the HUF1 header to determine the method (STORED or HUFFMAN). For HUFFMAN it rebuilds the identical tree from the stored frequency table, then uses <code>BitReader</code> to walk the tree bit-by-bit until exactly <code>originalSize</code> bytes have been emitted &mdash; guaranteeing a perfect lossless round-trip.</p>
+    </section>
+
+    <!-- 3. FILE WALK-THROUGH -->
+    <section id="files">
+      <h2><span class="icon">&#128194;</span> File-by-File Walk-through</h2>
+
+      <details open>
+        <summary>&#128196; huffman.hpp &mdash; Public Interface</summary>
+        <div class="file-pill">&#128196; huffman.hpp &middot; 64 lines</div>
+        <h4>Purpose</h4>
+        <p>Declares the <code>huffman</code> class &mdash; the single public entry point the CLI tools use. All implementation details (Node, Header, frequency table) are private, giving a clean ABI boundary.</p>
+        <h4>Key Structures</h4>
+        <ul>
+          <li><code>Node</code> &mdash; tree node holding <code>symbol</code>, <code>frequency</code>, <code>smallestSymbol</code> (for tie-breaking), and child pointers.</li>
+          <li><code>Header</code> &mdash; in-memory mirror of the on-disk HUF1 header: method, originalSize, originalFilename.</li>
+        </ul>
+        <pre style="position:relative"><span class="lang-label">C++</span><code><span class="kw">class</span> <span class="tp">huffman</span> {
+<span class="kw">private</span>:
+    <span class="kw">struct</span> <span class="tp">Node</span> {
+        std::<span class="tp">uint8_t</span>  symbol{};
+        std::<span class="tp">uint64_t</span> frequency{};
+        std::<span class="tp">uint16_t</span> smallestSymbol{};  <span class="cm">// tie-break key</span>
+        <span class="tp">Node</span>* left{<span class="kw">nullptr</span>};
+        <span class="tp">Node</span>* right{<span class="kw">nullptr</span>};
+        <span class="tp">bool</span> <span class="fn">isLeaf</span>() <span class="kw">const</span> { <span class="kw">return</span> left <span class="op">==</span> <span class="kw">nullptr</span> <span class="op">&amp;&amp;</span> right <span class="op">==</span> <span class="kw">nullptr</span>; }
+    };
+<span class="kw">public</span>:
+    <span class="fn">huffman</span>(<span class="kw">const</span> std::<span class="tp">string</span><span class="op">&amp;</span> in, <span class="kw">const</span> std::<span class="tp">string</span><span class="op">&amp;</span> out <span class="op">=</span> <span class="st">""</span>);
+    <span class="tp">void</span> <span class="fn">compress</span>();
+    <span class="tp">void</span> <span class="fn">decompress</span>();
+    <span class="kw">const</span> std::<span class="tp">string</span><span class="op">&amp;</span> <span class="fn">getRestoredFileName</span>() <span class="kw">const</span>;
+};</code></pre>
+        <h4>Design Rationale</h4>
+        <ul>
+          <li><code>std::unique_ptr&lt;Node&gt;</code> &mdash; automatic memory management; no risk of leaking tree nodes.</li>
+          <li><code>std::array&lt;uint64_t, 256&gt;</code> &mdash; stack-allocated, cache-friendly frequency table for all possible byte values.</li>
+          <li>Separate <code>Header</code> struct keeps parsing logic cohesive and testable.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>&#128196; huffman.cpp &mdash; Core Engine (386 lines)</summary>
+        <div class="file-pill">&#128196; huffman.cpp &middot; 386 lines</div>
+        <h4>Purpose</h4>
+        <p>Contains the entire compression engine: statistics collection, tree building, code generation, header I/O, the bit-stream encoder/decoder, and both <code>compress()</code> and <code>decompress()</code> methods.</p>
+        <h4>Key Functions</h4>
+        <div class="table-wrap"><table>
+          <tr><th>Function</th><th>Role</th></tr>
+          <tr><td><code>collectStatistics()</code></td><td>Single pass over the input file counting frequency of every byte (0&ndash;255) using a 64 KB read buffer.</td></tr>
+          <tr><td><code>buildTree()</code></td><td>Uses a min-heap (<code>std::priority_queue</code>) to merge lowest-frequency nodes into a Huffman tree.</td></tr>
+          <tr><td><code>createCodes()</code></td><td>Recursive DFS &mdash; appends &apos;0&apos; going left, &apos;1&apos; going right, stores the final code string per byte symbol.</td></tr>
+          <tr><td><code>compress()</code></td><td>Orchestrates encode: stats &rarr; tree &rarr; header &rarr; optional frequency table &rarr; BitWriter bit-stream.</td></tr>
+          <tr><td><code>decompress()</code></td><td>Reads header, rebuilds tree from frequency table, decodes bit-stream via BitReader into output file.</td></tr>
+          <tr><td><code>writeHeader() / readHeader()</code></td><td>Serialises/deserialises the HUF1 binary header with little-endian integer encoding.</td></tr>
+        </table></div>
+        <h4>Stored-mode Decision</h4>
+        <pre style="position:relative"><span class="lang-label">C++</span><code><span class="kw">const</span> std::<span class="tp">uint64_t</span> huffmanOverhead <span class="op">=</span> <span class="nm">2</span> <span class="op">+</span> <span class="fn">usedSymbolCount</span>() <span class="op">*</span> <span class="nm">9</span>;
+<span class="kw">const</span> <span class="tp">bool</span> useHuffman <span class="op">=</span> root <span class="op">!=</span> <span class="kw">nullptr</span>
+    <span class="op">&amp;&amp;</span> encodedBytes <span class="op">+</span> huffmanOverhead <span class="op">&lt;</span> originalSize;
+<span class="cm">// If false, raw bytes are copied verbatim &mdash; no size increase.</span></code></pre>
+      </details>
+
+      <details>
+        <summary>&#128196; encode.cpp &mdash; CLI Compressor</summary>
+        <div class="file-pill">&#128196; encode.cpp &middot; 31 lines</div>
+        <h4>Purpose</h4>
+        <p>Thin CLI wrapper: validates argument count, instantiates <code>huffman</code>, calls <code>compress()</code>, and prints the original size, archive size, and compression ratio to stdout.</p>
+        <pre style="position:relative"><span class="lang-label">C++</span><code><span class="tp">int</span> <span class="fn">main</span>(<span class="tp">int</span> argc, <span class="tp">char</span>* argv[]) {
+    <span class="tp">huffman</span> archive(argv[<span class="nm">1</span>], argv[<span class="nm">2</span>]);
+    archive.<span class="fn">compress</span>();
+    <span class="kw">auto</span> original   <span class="op">=</span> filesystem::<span class="fn">file_size</span>(argv[<span class="nm">1</span>]);
+    <span class="kw">auto</span> compressed <span class="op">=</span> filesystem::<span class="fn">file_size</span>(argv[<span class="nm">2</span>]);
+    cout <span class="op">&lt;&lt;</span> <span class="st">"Archive ratio: "</span>
+         <span class="op">&lt;&lt;</span> (<span class="nm">100.0</span> <span class="op">*</span> compressed <span class="op">/</span> original) <span class="op">&lt;&lt;</span> <span class="st">" %\n"</span>;
+}</code></pre>
+        <h4>Design Rationale</h4>
+        <p>Keeping the CLI entry point minimal means the <code>huffman</code> class is fully reusable in any host (GUI backend, library, unit test harness) without coupling it to <code>main()</code>.</p>
+      </details>
+
+      <details>
+        <summary>&#128196; decode.cpp &mdash; CLI Decompressor</summary>
+        <div class="file-pill">&#128196; decode.cpp &middot; 25 lines</div>
+        <h4>Purpose</h4>
+        <p>Accepts the archive path and an optional output path. If no output path is given, the filename stored <em>inside</em> the archive is used, preventing accidental overwrite of an existing file.</p>
+        <pre style="position:relative"><span class="lang-label">C++</span><code><span class="tp">huffman</span> archive(argv[<span class="nm">1</span>], argc <span class="op">==</span> <span class="nm">3</span> <span class="op">?</span> argv[<span class="nm">2</span>] <span class="op">:</span> <span class="st">""</span>);
+archive.<span class="fn">decompress</span>();
+cout <span class="op">&lt;&lt;</span> <span class="st">"Output: "</span> <span class="op">&lt;&lt;</span> archive.<span class="fn">getRestoredFileName</span>() <span class="op">&lt;&lt;</span> <span class="st">'\n'</span>;</code></pre>
+      </details>
+
+      <details>
+        <summary>&#128013; huffman_gui.py &mdash; Python GUI Frontend</summary>
+        <div class="file-pill">&#128013; huffman_gui.py &middot; 86 lines</div>
+        <h4>Purpose</h4>
+        <p>Provides a user-friendly desktop interface built with <code>tkinter</code>. It bridges the user to the C++ executables via <code>subprocess.run()</code>, surfacing success/error messages via message boxes.</p>
+        <h4>Key Feature &mdash; Smart Filename Suggestion</h4>
+        <p>When restoring, the GUI reads the first 18+ bytes of the <code>.huf</code> archive directly in Python to extract the stored original filename and pre-fills the save dialog &mdash; without invoking the C++ decoder.</p>
+        <pre style="position:relative"><span class="lang-label">Python</span><code><span class="kw">def</span> <span class="fn">original_filename</span>(archive_path):
+    <span class="kw">with</span> <span class="fn">open</span>(archive_path, <span class="st">"rb"</span>) <span class="kw">as</span> f:
+        header <span class="op">=</span> f.<span class="fn">read</span>(<span class="nm">18</span>)
+        <span class="kw">if</span> header[:<span class="nm">4</span>] <span class="op">!=</span> <span class="st">b"HUF1"</span>: <span class="kw">raise</span> <span class="tp">ValueError</span>()
+        fn_len <span class="op">=</span> struct.<span class="fn">unpack</span>(<span class="st">"&lt;H"</span>, header[<span class="nm">16</span>:<span class="nm">18</span>])[<span class="nm">0</span>]
+        <span class="kw">return</span> os.path.<span class="fn">basename</span>(
+            f.<span class="fn">read</span>(fn_len).<span class="fn">decode</span>(<span class="st">"utf-8"</span>, errors<span class="op">=</span><span class="st">"replace"</span>))</code></pre>
+        <h4>Design Rationale</h4>
+        <ul>
+          <li>Calling <code>subprocess.run()</code> with <code>capture_output=True</code> keeps the UI responsive and correctly surfaces C++ error messages.</li>
+          <li>The Python layer handles only UI concerns &mdash; all compression logic stays in C++ for performance.</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- 4. CUSTOM BIT I/O -->
+    <section id="bitio">
+      <h2><span class="icon">&#9889;</span> Custom Bit I/O Layer</h2>
+      <h3>Why it was rewritten</h3>
+      <p>The original implementation called <code>output.put()</code> (a system call) once per byte produced. For a 2 MB file compressed with Huffman, that is <strong>over 1.1 million</strong> individual write calls. Each call crosses the kernel/user-space boundary and stalls the CPU pipeline.</p>
+      <div class="diff-grid">
+        <div class="card diff-old">
+          <div class="diff-label">&#10060; Before &mdash; per-byte I/O</div>
+          <pre style="background:transparent;border:none;padding:0;margin:0"><code style="font-size:12px"><span class="kw">void</span> <span class="fn">write</span>(<span class="kw">const</span> std::<span class="tp">string</span><span class="op">&amp;</span> bits) {
+    <span class="kw">for</span> (<span class="kw">const</span> <span class="tp">char</span> bit : bits) {
+        buffer <span class="op">=</span> (buffer <span class="op">&lt;&lt;</span> <span class="nm">1</span>) <span class="op">|</span> (bit <span class="op">==</span> <span class="st">'1'</span>);
+        <span class="kw">if</span> (<span class="op">++</span>bitsInBuffer <span class="op">==</span> <span class="nm">8</span>)
+            output.<span class="fn">put</span>(buffer); <span class="cm">// system call!</span>
+    }
+}
+<span class="cm">// No padding count. Data lost if
+// finish() is forgotten.</span></code></pre>
+        </div>
+        <div class="card diff-new">
+          <div class="diff-label">&#10004; After &mdash; 8 KB buffered</div>
+          <pre style="background:transparent;border:none;padding:0;margin:0"><code style="font-size:12px"><span class="tp">void</span> <span class="fn">writeBit</span>(<span class="tp">bool</span> bit) {
+    bitAccum_ <span class="op">=</span> (bitAccum_ <span class="op">&lt;&lt;</span> <span class="nm">1</span>) <span class="op">|</span> (bit ? <span class="nm">1</span> : <span class="nm">0</span>);
+    <span class="kw">if</span> (<span class="op">++</span>bitsInAccum_ <span class="op">==</span> <span class="nm">8</span>)
+        <span class="fn">pushByte</span>(bitAccum_); <span class="cm">// 8 KB buffer</span>
+}
+<span class="tp">int</span> <span class="fn">finish</span>() { <span class="cm">// returns padding count 0-7</span>
+    <span class="kw">if</span> (bitsInAccum_ <span class="op">!=</span> <span class="nm">0</span>)
+        <span class="fn">pushByte</span>(bitAccum_ <span class="op">&lt;&lt;=</span> <span class="nm">8</span> <span class="op">-</span> bitsInAccum_);
+    <span class="fn">flushBuffer</span>(); <span class="cm">// one bulk write</span>
+    <span class="kw">return</span> paddingBits_;
+}</code></pre>
+        </div>
+      </div>
+      <h3>Before vs After &mdash; numbers</h3>
+      <div class="table-wrap"><table>
+        <tr><th>Metric</th><th>Old</th><th>New</th><th>Change</th></tr>
+        <tr><td>Write calls for 1 MB output</td><td>~1,000,000</td><td>~128</td><td>&#9989; 99.99% fewer</td></tr>
+        <tr><td>Internal buffer size</td><td>1 byte (register)</td><td>8,192 bytes</td><td>&#9989; 8192x bigger batches</td></tr>
+        <tr><td>Padding bits tracked</td><td>&#10060; No</td><td>&#9989; Yes (0&ndash;7)</td><td>&#9989; Future use</td></tr>
+        <tr><td>Safety on forgotten finish()</td><td>&#10060; Data lost</td><td>&#9989; Destructor flushes</td><td>&#9989; Safety net</td></tr>
+        <tr><td>Byte-aligned fast path</td><td>&#10060; No</td><td>&#9989; writeByte()/readByte()</td><td>&#9989; Skip bit loop</td></tr>
+        <tr><td>Diagnostics</td><td>&#10060; None</td><td>&#9989; totalBitsWritten()</td><td>&#9989; Observable</td></tr>
+      </table></div>
+      <div class="callout callout-tip">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-body"><strong>Interview talking point:</strong> The destructor as a safety net is an application of RAII (Resource Acquisition Is Initialisation) &mdash; a core C++ idiom. Even if an exception unwinds the stack, the buffer is flushed before the object is destroyed.</div>
+      </div>
+    </section>
+
+    <!-- 5. ALGORITHM -->
+    <section id="algorithm">
+      <h2><span class="icon">&#127795;</span> Compression Algorithm Details</h2>
+      <h3>Huffman Coding &mdash; core idea</h3>
+      <p>Huffman Coding is a <strong>lossless prefix-free variable-length encoding</strong>. Symbols that appear more frequently are assigned shorter bit strings; rare symbols get longer codes. Because no code is a prefix of another, the bit-stream can be decoded unambiguously without delimiters.</p>
+
+      <h3>Step 1 &mdash; Frequency Collection</h3>
+      <pre style="position:relative"><span class="lang-label">Pseudocode</span><code>freq[256] = {0}
+for each byte b in input_file:
+    freq[b] += 1
+// Uses a 64 KB read buffer per pass for I/O efficiency</code></pre>
+
+      <h3>Step 2 &mdash; Tree Building (Priority Queue)</h3>
+      <pre style="position:relative"><span class="lang-label">Pseudocode</span><code>min_heap = empty priority queue
+for each byte b where freq[b] > 0:
+    heap.push(LeafNode(b, freq[b]))
+
+while heap.size() > 1:
+    left  = heap.pop()   // lowest frequency
+    right = heap.pop()   // second lowest
+    parent = InternalNode(
+        frequency      = left.freq + right.freq,
+        smallestSymbol = min(left.smallest, right.smallest)  // tie-break
+    )
+    parent.left  = left
+    parent.right = right
+    heap.push(parent)
+
+root = heap.top()</code></pre>
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;&#65039;</div>
+        <div class="callout-body"><strong>Tie-breaking:</strong> When two nodes have equal frequency, the one with the <em>smaller byte value</em> is chosen first. This guarantees the tree shape is identical during compression and decompression &mdash; even though the frequency table is the only thing stored in the archive.</div>
+      </div>
+
+      <h3>Step 3 &mdash; Code Generation (DFS)</h3>
+      <pre style="position:relative"><span class="lang-label">Pseudocode</span><code>function generateCodes(node, prefix):
+    if node.isLeaf():
+        codes[node.symbol] = prefix
+        return
+    generateCodes(node.left,  prefix + "0")
+    generateCodes(node.right, prefix + "1")</code></pre>
+
+      <h3>Worked Example &mdash; "abracadabra"</h3>
+      <div class="table-wrap"><table>
+        <tr><th>Character</th><th>Frequency</th><th>Huffman Code</th><th>Bits used</th></tr>
+        <tr><td><code>'a'</code></td><td>5</td><td><code>0</code></td><td>5 &times; 1 = 5</td></tr>
+        <tr><td><code>'b'</code></td><td>2</td><td><code>10</code></td><td>2 &times; 2 = 4</td></tr>
+        <tr><td><code>'r'</code></td><td>2</td><td><code>110</code></td><td>2 &times; 3 = 6</td></tr>
+        <tr><td><code>'c'</code></td><td>1</td><td><code>1110</code></td><td>1 &times; 4 = 4</td></tr>
+        <tr><td><code>'d'</code></td><td>1</td><td><code>1111</code></td><td>1 &times; 4 = 4</td></tr>
+        <tr><td><strong>Total</strong></td><td>11 chars</td><td></td><td><strong>23 bits</strong> vs 88 bits ASCII</td></tr>
+      </table></div>
+      <p>Result: <strong>23 bits</strong> to encode 11 characters that would normally require 88 bits (8 per char) &mdash; a <strong>73.9% reduction</strong>.</p>
+
+      <h3>Stored Mode Fallback</h3>
+      <p>For files like JPEG, MP4, or PPTX that are <em>already compressed</em>, every byte appears with roughly equal frequency. Huffman generates codes of ~8 bits each &mdash; no saving. The engine detects this before encoding:</p>
+      <pre style="position:relative"><span class="lang-label">C++</span><code><span class="kw">const</span> std::<span class="tp">uint64_t</span> huffmanOverhead <span class="op">=</span>
+    <span class="nm">2</span> <span class="op">+</span> <span class="fn">usedSymbolCount</span>() <span class="op">*</span> <span class="nm">9</span>;  <span class="cm">// 2-byte count + 9 bytes per symbol</span>
+<span class="kw">const</span> <span class="tp">bool</span> useHuffman <span class="op">=</span>
+    root <span class="op">!=</span> <span class="kw">nullptr</span> <span class="op">&amp;&amp;</span>
+    encodedBytes <span class="op">+</span> huffmanOverhead <span class="op">&lt;</span> originalSize;</code></pre>
+    </section>
+
+    <!-- 6. FILE FORMAT -->
+    <section id="format">
+      <h2><span class="icon">&#128203;</span> File Format Specification</h2>
+      <h3>HUF1 Header Layout</h3>
+      <div class="table-wrap"><table>
+        <tr><th>Offset</th><th>Size (bytes)</th><th>Field</th><th>Value / Purpose</th></tr>
+        <tr><td>0</td><td>4</td><td><code>magic</code></td><td><code>H U F 1</code> &mdash; identifies the archive format.</td></tr>
+        <tr><td>4</td><td>1</td><td><code>version</code></td><td><code>0x01</code> &mdash; current format version.</td></tr>
+        <tr><td>5</td><td>1</td><td><code>method</code></td><td><code>0x00</code> = STORED, <code>0x01</code> = HUFFMAN.</td></tr>
+        <tr><td>6</td><td>2</td><td><code>reserved</code></td><td>Zero-padded; reserved for future HUF features.</td></tr>
+        <tr><td>8</td><td>8</td><td><code>original_size</code></td><td>Little-endian <code>uint64_t</code> &mdash; exact byte count of original file.</td></tr>
+        <tr><td>16</td><td>2</td><td><code>filename_length</code></td><td>Little-endian <code>uint16_t</code> &mdash; UTF-8 byte count of filename.</td></tr>
+        <tr><td>18</td><td>N</td><td><code>filename</code></td><td>Original filename (no path) stored as UTF-8 bytes.</td></tr>
+      </table></div>
+      <h3>Payload &mdash; STORED method</h3>
+      <p>Immediately after the header, the raw input file bytes are copied verbatim. No frequency table is written.</p>
+      <h3>Payload &mdash; HUFFMAN method</h3>
+      <div class="table-wrap"><table>
+        <tr><th>Part</th><th>Size</th><th>Description</th></tr>
+        <tr><td>Symbol count</td><td>2 bytes</td><td>Little-endian <code>uint16_t</code> &mdash; how many distinct byte symbols appear.</td></tr>
+        <tr><td>Frequency entries</td><td>9 &times; count</td><td>Each entry: 1 byte (symbol) + 8 bytes (frequency as little-endian <code>uint64_t</code>).</td></tr>
+        <tr><td>Bit-stream</td><td>variable</td><td>Concatenated Huffman codes for every input byte, zero-padded to a full byte.</td></tr>
+      </table></div>
+      <div class="callout callout-warn">
+        <div class="callout-icon">&#9888;&#65039;</div>
+        <div class="callout-body"><strong>No padding metadata in v1:</strong> The decoder stops by counting decoded bytes against <code>original_size</code>, not by detecting an end-of-stream marker. Padding zeros at the end of the bit-stream are simply ignored.</div>
+      </div>
+    </section>
+
+    <!-- 7. METRICS -->
+    <section id="metrics">
+      <h2><span class="icon">&#128202;</span> Performance Metrics</h2>
+      <div class="table-wrap"><table>
+        <tr><th>Input file</th><th>Original size</th><th>Compressed size</th><th>Ratio</th><th>Method</th></tr>
+        <tr><td><code>inputFile.txt</code> (plain text)</td><td>2,173,433 B (2.1 MB)</td><td>1,153,088 B (1.1 MB)</td><td><strong style="color:var(--green)">53%</strong></td><td>HUFFMAN</td></tr>
+        <tr><td><code>sample.bmp</code> (uncompressed bitmap)</td><td>1,220,000 B</td><td>1,219,800 B (stored)</td><td>~100%</td><td>STORED</td></tr>
+        <tr><td><code>photo.jpg</code></td><td>3,500,000 B</td><td>3,500,000 B (stored)</td><td>~100%</td><td>STORED</td></tr>
+        <tr><td><code>presentation.pptx</code></td><td>5,200,000 B</td><td>5,200,000 B (stored)</td><td>~100%</td><td>STORED</td></tr>
+      </table></div>
+      <h3>Why photos, videos, and PPTX don't compress</h3>
+      <ul>
+        <li><strong>JPEG / MP4:</strong> These formats apply DCT, quantisation, and entropy coding internally. Output bytes appear pseudo-random &mdash; every value 0&ndash;255 has roughly equal frequency.</li>
+        <li><strong>PPTX:</strong> A PPTX file is actually a <strong>ZIP archive</strong> in disguise. Its contents are already deflated, so byte distribution is essentially uniform entropy.</li>
+        <li><strong>Huffman limitation:</strong> Huffman coding only exploits <em>symbol frequency imbalance</em>. Adding LZ77 before Huffman &mdash; forming DEFLATE &mdash; solves this for structured data.</li>
+      </ul>
+    </section>
+
+    <!-- 8. TESTING -->
+    <section id="testing">
+      <h2><span class="icon">&#129514;</span> Testing &amp; Validation</h2>
+      <h3>Round-trip test strategy</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-title">Compress</div>
+          <div class="timeline-body">Run <code>encode.exe</code> on the input file. Record archive size and reported ratio.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">Decompress</div>
+          <div class="timeline-body">Run <code>decode.exe</code> on the resulting <code>.huf</code> archive. Record restored size.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">Byte-wise compare</div>
+          <div class="timeline-body">Use <code>fc /B</code> (Windows) to verify every single byte of the restored file matches the original. Exit code 0 = perfect.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-title">Edge cases</div>
+          <div class="timeline-body">Empty file, single-byte file (all-same bytes = single leaf node), already-compressed binary, very large files.</div>
+        </div>
+      </div>
+      <h3>PowerShell commands (exact)</h3>
+      <pre style="position:relative"><span class="lang-label">PowerShell</span><code><span class="cm"># Step 1 &mdash; compress</span>
+.\encode.exe inputFile.txt test.huf
+
+<span class="cm"># Step 2 &mdash; decompress</span>
+.\decode.exe test.huf restored.txt
+
+<span class="cm"># Step 3 &mdash; verify byte-for-byte identity</span>
+cmd /c "fc /B inputFile.txt restored.txt"
+<span class="cm"># Expected: "FC: no differences encountered"</span>
+
+<span class="cm"># Cleanup</span>
+Remove-Item test.huf, restored.txt</code></pre>
+      <h3>Safety-net: BitWriter destructor</h3>
+      <pre style="position:relative"><span class="lang-label">C++</span><code><span class="op">~</span><span class="fn">BitWriter</span>() {
+    <span class="cm">// Flush the 8 KB I/O buffer even if finish() was never called.
+    // Prevents data loss during exception-driven stack unwinding (RAII).</span>
+    <span class="kw">if</span> (bufferPos_ <span class="op">&gt;</span> <span class="nm">0</span>) {
+        <span class="fn">flushBuffer</span>();
+    }
+}</code></pre>
+    </section>
+
+    <!-- 9. FUTURE WORK -->
+    <section id="future">
+      <h2><span class="icon">&#128640;</span> Enhancements &amp; Future Work</h2>
+      <details>
+        <summary>&#128256; Multi-threaded Chunk Compression</summary>
+        <p>Divide large files into N equally-sized chunks, compress each in a separate <code>std::thread</code>, and concatenate the results.</p>
+        <ul>
+          <li>Each chunk needs its own independent Huffman tree.</li>
+          <li>Expected speedup: ~3&ndash;4&times; on a quad-core for files &gt;50 MB.</li>
+          <li><em>CV metric: "Reduced compression time by 75% via multi-threaded chunk processing."</em></li>
+        </ul>
+      </details>
+      <details>
+        <summary>&#128230; LZ77 (DEFLATE) Pre-Pass</summary>
+        <p>Add a dictionary-based compressor <em>before</em> the Huffman stage. LZ77 scans for repeated sequences and replaces them with (offset, length) back-references. The resulting token stream is then Huffman-encoded &mdash; this is exactly the DEFLATE algorithm used by <code>.zip</code>, <code>.gz</code>, and PNG.</p>
+        <ul>
+          <li>Enables meaningful compression of source code, JSON, XML, and structured binary.</li>
+          <li><em>CV metric: "Implemented DEFLATE, enabling high-ratio compression on binary formats previously resistant to entropy coding."</em></li>
+        </ul>
+      </details>
+      <details>
+        <summary>&#128193; Directory Archiving (tar-style)</summary>
+        <p>Extend HUF1 to support multiple file entries. Each entry has its own sub-header (relative path, size, method) followed by its payload. The encoder recursively walks directories with <code>std::filesystem::recursive_directory_iterator</code>.</p>
+      </details>
+      <details>
+        <summary>&#128377;&#65039; GUI Improvements</summary>
+        <ul>
+          <li><strong>Drag-and-drop:</strong> Accept files dragged onto the window using <code>tkinterdnd2</code>.</li>
+          <li><strong>Progress bar:</strong> Show real-time progress by reading stdout as the C++ encoder runs.</li>
+          <li><strong>Compression preview:</strong> Show estimated ratio before committing, based on a quick frequency scan.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>&#128272; Integrity Checksums</summary>
+        <p>Append a CRC-32 or SHA-256 checksum to the archive. The decoder verifies the checksum before writing the output, detecting bit-rot or accidental truncation.</p>
+      </details>
+    </section>
+
+    <!-- 10. Q&A -->
+    <section id="qa">
+      <h2><span class="icon">&#127908;</span> Interview-Ready Q&amp;A</h2>
+
+      <div class="qa-item">
+        <div class="qa-q">Why does your project use an 8 KB internal buffer in BitWriter and BitReader?</div>
+        <div class="qa-a"><ul>
+          <li>Each <code>output.put()</code> / <code>input.get()</code> is a system call that crosses the kernel/user boundary.</li>
+          <li>For a 2 MB compressed file there are over 1 million such calls &mdash; each stalling the CPU pipeline.</li>
+          <li>An 8 KB buffer reduces those to ~128 bulk <code>write()</code>/<code>read()</code> calls &mdash; a <strong>99.99% reduction</strong> in system-call overhead.</li>
+          <li>8 KB is chosen because it fits in L1/L2 cache, keeping memory access fast.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">How does stored mode prevent negative compression (the archive being larger than the original)?</div>
+        <div class="qa-a"><ul>
+          <li>Before encoding, compute <code>encodedBytes = encodedBits / 8</code> and <code>huffmanOverhead = 2 + usedSymbols &times; 9</code>.</li>
+          <li>If <code>encodedBytes + overhead &ge; originalSize</code>, write <code>method = STORED</code> and copy bytes verbatim.</li>
+          <li>The archive overhead is only the fixed HUF1 header (a few dozen bytes), never the Huffman frequency table.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">What guarantees deterministic Huffman tree reconstruction at decode time?</div>
+        <div class="qa-a"><ul>
+          <li>When two nodes have equal frequency in the priority queue, the tie is broken by choosing the node with the <strong>smallest byte symbol value</strong>.</li>
+          <li>This is implemented via the <code>smallestSymbol</code> field propagated up through internal nodes.</li>
+          <li>Because the tie-breaking rule is the same at both encode and decode (only the frequency table is stored), the tree is always identical.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">Why doesn't Huffman coding compress JPEG, MP4, or PPTX files?</div>
+        <div class="qa-a"><ul>
+          <li>These formats apply their own entropy coding (JPEG uses Huffman + DCT, MP4 uses H.264, PPTX is a ZIP archive internally).</li>
+          <li>After their own compression, the output bytes appear pseudo-random &mdash; every value 0&ndash;255 has roughly equal frequency.</li>
+          <li>Huffman can only exploit <em>symbol imbalance</em>; with uniform byte distribution it assigns ~8-bit codes to 8-bit values, giving zero gain.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">How does the Python GUI know what filename to suggest when restoring a file?</div>
+        <div class="qa-a"><ul>
+          <li>The Python code opens the <code>.huf</code> archive directly and reads the first 18 bytes.</li>
+          <li>It validates the <code>HUF1</code> magic and parses the 2-byte filename length at offset 16.</li>
+          <li>It reads that many UTF-8 bytes and strips the directory path with <code>os.path.basename()</code>.</li>
+          <li>This happens in Python without invoking the C++ decoder, keeping the UI responsive.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">What is the time complexity of building the Huffman tree?</div>
+        <div class="qa-a"><ul>
+          <li><strong>O(n log n)</strong> where n is the number of distinct symbols (at most 256).</li>
+          <li>Building the initial heap: O(n). Each merge operation: O(log n) for heap push/pop.</li>
+          <li>Since n &le; 256, this is effectively O(1) relative to file size. The dominant cost is the file I/O passes.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">Why use <code>std::unique_ptr&lt;Node&gt;</code> for tree nodes?</div>
+        <div class="qa-a"><ul>
+          <li>Each node is heap-allocated; <code>unique_ptr</code> ensures automatic cleanup when the <code>nodes</code> vector is destroyed.</li>
+          <li>Raw pointers into the same vector are safe to use for child links because the vector is never modified after building.</li>
+          <li>This is RAII &mdash; the tree memory has a clear, deterministic lifetime tied to the <code>huffman</code> object.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">Why does the decoder stop at exactly <code>original_size</code> bytes rather than at end-of-stream?</div>
+        <div class="qa-a"><ul>
+          <li>The last byte of the bit-stream may be zero-padded (up to 7 bits of padding).</li>
+          <li>Without knowing the original size, the decoder could emit extra bytes decoded from those padding zeros.</li>
+          <li>Storing <code>originalSize</code> in the header lets the decoder emit exactly the right number of bytes and stop &mdash; no end-of-stream sentinel needed.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">How would you extend this project to support compressing an entire directory?</div>
+        <div class="qa-a"><ul>
+          <li>Introduce a new archive version (HUF2) with a multi-entry structure.</li>
+          <li>Each entry: sub-header (relative path, original size, method) followed by its payload.</li>
+          <li>The encoder recursively walks the directory with <code>std::filesystem::recursive_directory_iterator</code>.</li>
+          <li>The decoder reads entries sequentially, recreating the directory tree with <code>std::filesystem::create_directories()</code>.</li>
+        </ul></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q">What would you add to make this production-grade?</div>
+        <div class="qa-a"><ul>
+          <li><strong>Checksums:</strong> CRC-32 or SHA-256 of the payload to detect corruption.</li>
+          <li><strong>Streaming interface:</strong> Process files larger than available RAM in fixed-size windows.</li>
+          <li><strong>LZ77 pre-pass:</strong> Exploit repeated byte sequences (forming DEFLATE) for far better ratios on structured data.</li>
+          <li><strong>Thread safety:</strong> Allow concurrent compress/decompress calls from different threads.</li>
+          <li><strong>Progress callbacks:</strong> Expose a callback so the GUI can display a progress bar in real time.</li>
+        </ul></div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span>Huffman File Archiver &mdash; Interview Study Guide &middot; Generated 2026-08-28</span>
+  <span>C++17 &middot; Python 3 &middot; Custom HUF1 Binary Format</span>
+</footer>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const btn = document.getElementById('theme-toggle');
+    if (html.getAttribute('data-theme') === 'dark') {
+      html.setAttribute('data-theme', 'light');
+      btn.innerHTML = '<span id="theme-icon">&#127769;</span> Dark Mode';
+    } else {
+      html.setAttribute('data-theme', 'dark');
+      btn.innerHTML = '<span id="theme-icon">&#9728;&#65039;</span> Light Mode';
+    }
+  }
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('#toc a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector('#toc a[href="#' + entry.target.id + '"]');
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
