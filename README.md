@@ -29,7 +29,7 @@ And a constructor which accepts input file and output file. The object of this c
 4)`saveEncodedFile()`: This function saves the Huffman encoded input file to the output file. The image below
 illustrates how the output file is written.
 
-![1, design](/Images/1.png)
+
 
 minHeap = ({character data} {huffman code for that character}) * minheapsize
 
@@ -50,16 +50,11 @@ The output file should be (.huf) file which represents it is a Huffman encoded f
 **How to run this project?**
 To run this project you need to create an executable file. You can follow the steps given below:
 1) For compressing:
-![2, terminal1](/Images/2.png)
+
 
 2) For Decompressing:
-![3, terminal2](/Images/3.png)
+
 
 **Result**: This project is just an implementation of Huffman coding, it is not as efficient as the compression algorithm used currently to compress files.
 Example: inputFile.txt (2.2MB) is compressed to compressedFile.huf (1.1MB) file and decompressed back to ouputFile.txt (2.2MB).
 
-![4, info1](/Images/4.png)
-
-![5, info2](/Images/5.png)
-
-![6, info3](/Images/6.png)
